@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+
+    <!-- CSS BAĞLAMA -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Günlük Verimlilik</h1>
+
+    <p>Kambur Sayısı: <span id="posture">Yükleniyor...</span></p>
+    <p>Odak Süresi: <span id="focus">Yükleniyor...</span></p>
+
+</div>
+
+<script>
+    fetch("http://127.0.0.1:5000/logs/1")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("posture").innerText = data.posture;
+            document.getElementById("focus").innerText = data.focus + " dk";
+        })
+        .catch(error => console.log("Hata:", error));
+</script>
+
+</body>
+</html>

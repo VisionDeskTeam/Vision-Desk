@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gerçek zamanlı odaklanma ve duruş verilerini izleyen kişisel verimlilik panosu." />
+  <title>FocusBoard — Verimlilik Panosu</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ── TOP BAR ── -->
+  <nav class="top-bar" aria-label="Üst navigasyon">
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">⚡</div>
+      <span class="brand-name">FocusBoard</span>
+    </div>
+
+    <div class="status-badge" id="status-badge">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-label">Canlı Veri</span>
+    </div>
+
+    <button class="refresh-btn" id="refresh-btn" aria-label="Verileri yenile" onclick="fetchData()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+           aria-hidden="true">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+      Yenile
+    </button>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <header class="hero">
+    <span class="hero-label">📊 Gerçek Zamanlı İzleme</span>
+    <h1>Verimlilik Panonuz</h1>
+    <p>Odaklanma sürenizi ve duruş kalitenizi anlık olarak takip edin.</p>
+    <p class="last-updated">
+      Son güncelleme: <span id="last-update-time">—</span>
+    </p>
+  </header>
+
+  <!-- ── LOADING STATE ── -->
+  <div id="loading-state" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="loading-text">
+      Veriler yükleniyor
+      <span class="loading-dots" aria-hidden="true">
+        <span>.</span><span>.</span><span>.</span>
+      </span>
+    </p>
+  </div>
+
+  <!-- ── ERROR STATE ── -->
+  <div id="error-state" role="alert" aria-live="assertive">
+    <div class="error-icon" aria-hidden="true">⚠️</div>
+    <p class="error-title">Veriler Alınamadı</p>
+    <p class="error-sub" id="error-message">
+      API'ye bağlanırken bir sorun oluştu. Lütfen sunucunun çalıştığından emin olun.
+    </p>
+    <button class="retry-btn" id="retry-btn" onclick="fetchData()">
+      Tekrar Dene
+    </button>
+  </div>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main id="main-content" class="hidden" aria-label="Metrik kartları">
+
+    <!-- SVG Gradients (hidden, reused by cards) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <linearGradient id="gradBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#4f8ef7"/>
+          <stop offset="100%" stop-color="#a78bfa"/>
+        </linearGradient>
+        <linearGradient id="gradGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#34d27b"/>
+          <stop offset="100%" stop-color="#4f8ef7"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ── METRIC CARDS ── -->
+    <section class="metrics-grid" aria-label="Ana metrikler">
+
+      <!-- FOCUS CARD -->
+      <article class="metric-card focus-card" id="focus-card">
+        <div class="card-glow" aria-hidden="true"></div>
+
+        <div class="card-header">
+          <div class="card-label">
+            <div class="card-icon" aria-hidden="true">🎯</div>
+            <span class="card-title">Odaklanma Süresi</span>
+          </div>
+          <span class="card-badge" id="focus-badge">Aktif</span>
+        </div>
+
+        <div class="card-body">
+          <!-- Circular Ring -->
+          <div class="ring-container" aria-hidden="true">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle class="ring-track"  cx="45" cy="45" r="40"/>
+              <circle class="ring-fill" id="focus-ring" cx="45" cy="45" r="40"/>
+            </svg>
+            <div class="ring-center">
+              <span class="ring-percent" id="focus-ring-pct">0%</span>
+              <span class="ring-unit">hedef</span>
+            </div>
+          </div>
+
+          <!-- Value -->
+          <div class="card-value-section">
+            <div class="card-value" id="focus-value">—</div>
+            <div class="card-unit" id="focus-unit">saniye</div>
+
+            <div class="mini-bar-track" aria-hidden="true">
+              <div class="mini-bar-fill" id="focus-bar"></div>
+            </div>
+            <p class="card-subtitle" id="focus-subtitle">Veriler hesaplanıyor…</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- POSTURE CARD -->
+      <article class="metric-card posture-card" id="posture-card">
+        <div class="card-glow" aria-hidden="true"></div>
+
+        <div class="card-header">
+          <div class="card-label">
+            <div class="card-icon" aria-hidden="true">🧍</div>
+            <span class="card-title">Duruş Kalitesi</span>
+          </div>
+          <span class="card-badge" id="posture-badge">İzleniyor</span>
+        </div>
+
+        <div class="card-body">
+          <!-- Circular Ring -->
+          <div class="ring-container" aria-hidden="true">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle class="ring-track"  cx="45" cy="45" r="40"/>
+              <circle class="ring-fill" id="posture-ring" cx="45" cy="45" r="40"/>
+            </svg>
+            <div class="ring-center">
+              <span class="ring-percent" id="posture-ring-pct">0%</span>
+              <span class="ring-unit">skor</span>
+            </div>
+          </div>
+
+          <!-- Value -->
+          <div class="card-value-section">
+            <div class="card-value" id="posture-value">—</div>
+            <div class="card-unit">/ 100 puan</div>
+
+            <div class="mini-bar-track" aria-hidden="true">
+              <div class="mini-bar-fill" id="posture-bar"></div>
+            </div>
+            <p class="card-subtitle" id="posture-subtitle">Duruş analiz ediliyor…</p>
+          </div>
+        </div>
+      </article>
+
+    </section><!-- /metrics-grid -->
+
+    <!-- ── SUMMARY STRIP ── -->
+    <section class="summary-strip" aria-label="Özet istatistikler">
+
+      <div class="summary-item" id="summary-focus-min">
+        <div class="summary-label">Odak (Dakika)</div>
+        <div class="summary-value" id="sum-focus-min">—</div>
+        <div class="summary-sub">dakika odaklanma</div>
+      </div>
+
+      <div class="summary-item" id="summary-posture-grade">
+        <div class="summary-label">Duruş Notu</div>
+        <div class="summary-value" id="sum-posture-grade">—</div>
+        <div class="summary-sub">genel değerlendirme</div>
+      </div>
+
+      <div class="summary-item" id="summary-focus-status">
+        <div class="summary-label">Odak Durumu</div>
+        <div class="summary-value" id="sum-focus-status">—</div>
+        <div class="summary-sub">mevcut performans</div>
+      </div>
+
+      <div class="summary-item" id="summary-session">
+        <div class="summary-label">Oturum</div>
+        <div class="summary-value" id="sum-session">—</div>
+        <div class="summary-sub">aktif kayıt</div>
+      </div>
+
+    </section><!-- /summary-strip -->
+
+  </main><!-- /#main-content -->
+
+  <!-- ── FOOTER ── -->
+  <footer class="page-footer">
+    <p>FocusBoard &copy; 2026 &mdash; Python Flask + SQL Server</p>
+  </footer>
+
+</div><!-- /.page-wrapper -->
+
+<!-- ────────────────────────────────────────────
+     JAVASCRIPT
+     ──────────────────────────────────────────── -->
+<script>
+  /* ── Config ── */
+  const API_URL        = '/api/veriler';
+  const REFRESH_MS     = 30_000;   // 30 saniyede bir otomatik yenile
+  const FOCUS_TARGET_S = 600;      // Odak hedefi: 600 saniye (10 dk)
+
+  /* ── DOM Refs ── */
+  const loadingEl   = document.getElementById('loading-state');
+  const errorEl     = document.getElementById('error-state');
+  const mainEl      = document.getElementById('main-content');
+  const updateTime  = document.getElementById('last-update-time');
+  const errorMsg    = document.getElementById('error-message');
+
+  /* ── Ring math ── */
+  const CIRCUMFERENCE = 2 * Math.PI * 40; // r=40 → ≈ 251.2
+
+  function setRing(ringEl, pctEl, percent) {
+    const clamped = Math.min(100, Math.max(0, percent));
+    const offset  = CIRCUMFERENCE - (clamped / 100) * CIRCUMFERENCE;
+    ringEl.style.strokeDashoffset = offset;
+    pctEl.textContent = Math.round(clamped) + '%';
+  }
+
+  /* ── Helpers ── */
+  function secondsToMinSec(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m > 0
+      ? `${m} dk ${sec > 0 ? sec + ' sn' : ''}`.trim()
+      : `${s} sn`;
+  }
+
+  function postureGrade(score) {
+    if (score >= 85) return '🏆 Mükemmel';
+    if (score >= 70) return '✅ İyi';
+    if (score >= 50) return '⚠️ Orta';
+    return '❌ Zayıf';
+  }
+
+  function focusStatus(seconds) {
+    if (seconds >= FOCUS_TARGET_S) return '🎯 Hedefte';
+    if (seconds >= FOCUS_TARGET_S * 0.6) return '📈 İlerleme';
+    if (seconds >= FOCUS_TARGET_S * 0.3) return '🔵 Başladı';
+    return '⏳ Az';
+  }
+
+  function postureLabel(score) {
+    if (score >= 85) return 'Duruşunuz mükemmel, devam edin!';
+    if (score >= 70) return 'İyi duruş, küçük iyileştirmeler yapılabilir.';
+    if (score >= 50) return 'Ortalama — duruşunuza dikkat edin.';
+    return 'Duruşunuzu düzeltmeniz öneriliyor.';
+  }
+
+  /* ── UI state switches ── */
+  function showLoading() {
+    loadingEl.style.display = 'flex';
+    errorEl.style.display   = 'none';
+    mainEl.classList.add('hidden');
+  }
+
+  function showError(msg) {
+    loadingEl.style.display = 'none';
+    errorEl.style.display   = 'flex';
+    mainEl.classList.add('hidden');
+    if (msg) errorMsg.textContent = msg;
+    // Switch status dot to error colour
+    document.getElementById('status-dot').style.background = '#f87171';
+    document.getElementById('status-label').textContent    = 'Bağlantı Hatası';
+  }
+
+  function showData() {
+    loadingEl.style.display = 'none';
+    errorEl.style.display   = 'none';
+    mainEl.classList.remove('hidden');
+    document.getElementById('status-dot').style.background = '#34d27b';
+    document.getElementById('status-label').textContent    = 'Canlı Veri';
+  }
+
+  /* ── Render ── */
+  function render(item) {
+    const focus   = Number(item.focus)   || 0;
+    const posture = Number(item.posture) || 0;
+
+    /* Focus card */
+    const focusPct = Math.min(100, (focus / FOCUS_TARGET_S) * 100);
+    document.getElementById('focus-value').textContent    = focus;
+    document.getElementById('focus-unit').textContent     = 'saniye odaklanma';
+    document.getElementById('focus-bar').style.width      = focusPct + '%';
+    document.getElementById('focus-subtitle').textContent = secondsToMinSec(focus) + ' odaklandınız';
+    document.getElementById('focus-badge').textContent    = focus > 0 ? 'Aktif' : 'Beklemede';
+
+    /* Posture card */
+    const posturePct = Math.min(100, posture);
+    document.getElementById('posture-value').textContent    = posture;
+    document.getElementById('posture-bar').style.width      = posturePct + '%';
+    document.getElementById('posture-subtitle').textContent = postureLabel(posture);
+    document.getElementById('posture-badge').textContent    = 'İzleniyor';
+
+    /* Rings — deferred so transition fires after display:block */
+    requestAnimationFrame(() => {
+      setRing(
+        document.getElementById('focus-ring'),
+        document.getElementById('focus-ring-pct'),
+        focusPct
+      );
+      setRing(
+        document.getElementById('posture-ring'),
+        document.getElementById('posture-ring-pct'),
+        posturePct
+      );
+    });
+
+    /* Summary strip */
+    document.getElementById('sum-focus-min').textContent    = (focus / 60).toFixed(1);
+    document.getElementById('sum-posture-grade').textContent = postureGrade(posture);
+    document.getElementById('sum-focus-status').textContent  = focusStatus(focus);
+    document.getElementById('sum-session').textContent       = '#1';
+
+    /* Timestamp */
+    updateTime.textContent = new Date().toLocaleTimeString('tr-TR');
+  }
+
+  /* ── Fetch ── */
+  async function fetchData() {
+    showLoading();
+    try {
+      const res = await fetch(API_URL, { cache: 'no-store' });
+
+      if (!res.ok) {
+        throw new Error(`Sunucu hatası: ${res.status} ${res.statusText}`);
+      }
+
+      const json = await res.json();
+
+      // API tek nesne veya dizi döndürebilir
+      const item = Array.isArray(json) ? json[0] : json;
+
+      if (!item || (item.focus === undefined && item.posture === undefined)) {
+        throw new Error('API boş veya beklenmedik bir format döndürdü.');
+      }
+
+      showData();
+      render(item);
+
+    } catch (err) {
+      console.error('[FocusBoard] Veri alınamadı:', err);
+      showError(err.message || 'Bilinmeyen bir hata oluştu.');
+    }
+  }
+
+  /* ── Auto-refresh ── */
+  let autoRefreshTimer = setInterval(fetchData, REFRESH_MS);
+
+  /* Reset timer on manual refresh */
+  document.getElementById('refresh-btn').addEventListener('click', () => {
+    clearInterval(autoRefreshTimer);
+    autoRefreshTimer = setInterval(fetchData, REFRESH_MS);
+  });
+
+  /* ── Init ── */
+  fetchData();
+</script>
+
+</body>
+</html>

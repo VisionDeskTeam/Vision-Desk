@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FocusBoard kullanıcı ve yönetici giriş ekranı." />
+  <title>Giriş Yap — FocusBoard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- ══════════════════════════════════════════
+       LEFT — Branding panel
+  ══════════════════════════════════════════ -->
+  <div class="auth-panel-left" id="left-panel" aria-hidden="true">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+
+    <div class="brand-block">
+      <div class="brand-logo" id="brand-logo">⚡</div>
+
+      <h1 class="brand-title" id="panel-title">FocusBoard</h1>
+      <p class="brand-desc" id="panel-desc">
+        Odaklanma sürenizi ve duruş kalitenizi gerçek zamanlı olarak izleyin. Verileriniz güvende.
+      </p>
+
+      <ul class="feature-list">
+        <li class="feature-pill"><span>🎯</span> Anlık odaklanma takibi</li>
+        <li class="feature-pill"><span>🧍</span> Duruş kalite skoru</li>
+        <li class="feature-pill"><span>📊</span> Kişisel verimlilik panosu</li>
+        <li class="feature-pill"><span>🔐</span> Güvenli şifreli bağlantı</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       RIGHT — Form panel
+  ══════════════════════════════════════════ -->
+  <div class="auth-panel-right">
+    <div class="auth-box" id="auth-box">
+
+      <!-- Back to dashboard -->
+      <a href="{{ url_for('dashboard.dashboard') }}" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Panoya dön
+      </a>
+
+      <!-- Role toggle: Kullanıcı / Admin -->
+      <div class="role-toggle" id="role-toggle" role="tablist" aria-label="Giriş türü seçimi">
+        <button class="role-toggle-btn active" id="btn-user" role="tab"
+                aria-selected="true" aria-controls="form-section"
+                onclick="switchRole('user')">
+          👤 Kullanıcı
+        </button>
+        <button class="role-toggle-btn" id="btn-admin" role="tab"
+                aria-selected="false" aria-controls="form-section"
+                onclick="switchRole('admin')">
+          🛡️ Admin
+        </button>
+        <div class="toggle-slider" id="toggle-slider" aria-hidden="true"></div>
+      </div>
+
+      <!-- Admin badge -->
+      <span class="admin-badge" id="admin-badge" aria-live="polite">
+        🛡️ Yönetici Paneli
+      </span>
+
+      <!-- Form heading -->
+      <div class="form-heading">
+        <h2 class="form-title" id="form-title">Hoş Geldiniz</h2>
+        <p class="form-subtitle" id="form-subtitle">
+          Hesabınıza giriş yapın, verilerinizi görüntüleyin.
+        </p>
+      </div>
+
+      <!-- Alert banner -->
+      <div class="auth-alert" id="auth-alert" role="alert" aria-live="assertive">
+        <span id="alert-icon">❌</span>
+        <span id="alert-text">Kullanıcı adı veya şifre hatalı.</span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" novalidate>
+
+        <!-- Username -->
+        <div class="input-group" id="grp-username">
+          <label for="username">Kullanıcı Adı</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <input class="auth-input" type="text" id="username" name="username"
+                   placeholder="kullanici_adi" autocomplete="username" required />
+          </div>
+          <p class="input-error" id="err-username">Kullanıcı adı boş bırakılamaz.</p>
+        </div>
+
+        <!-- Password -->
+        <div class="input-group" id="grp-password">
+          <label for="password">Şifre</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <input class="auth-input" type="password" id="password" name="password"
+                   placeholder="••••••••" autocomplete="current-password" required />
+            <button type="button" class="pwd-toggle" id="pwd-toggle"
+                    aria-label="Şifreyi göster/gizle" onclick="togglePassword('password','pwd-toggle')">
+              <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <p class="input-error" id="err-password">Şifre boş bırakılamaz.</p>
+        </div>
+
+        <!-- Remember / Forgot -->
+        <div class="form-extras">
+          <label class="checkbox-label">
+            <input type="checkbox" id="remember" name="remember" />
+            Beni hatırla
+          </label>
+          <a href="#" class="forgot-link" id="forgot-link">Şifremi unuttum</a>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="auth-btn auth-btn-user" id="submit-btn">
+          <span class="btn-text" id="btn-text">Giriş Yap</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+
+      </form>
+
+      <!-- Divider -->
+      <div class="auth-divider">veya</div>
+
+      <!-- Switch to register -->
+      <p class="auth-bottom">
+        Hesabınız yok mu?
+        <a href="{{ url_for('auth.register') }}" id="register-link">Kayıt Ol</a>
+      </p>
+
+    </div><!-- /.auth-box -->
+  </div><!-- /.auth-panel-right -->
+
+</div><!-- /.auth-page -->
+
+<!-- ────────────────────────────────────────────
+     JAVASCRIPT
+──────────────────────────────────────────── -->
+<script>
+  /* ── State ── */
+  let currentRole = 'user';   // 'user' | 'admin'
+
+  /* ── Role switch ── */
+  function switchRole(role) {
+    currentRole = role;
+    const isAdmin = role === 'admin';
+
+    /* Toggle pill */
+    document.getElementById('role-toggle').classList.toggle('admin-mode', isAdmin);
+    document.getElementById('auth-box').classList.toggle('admin-mode', isAdmin);
+
+    /* Buttons */
+    document.getElementById('btn-user').classList.toggle('active', !isAdmin);
+    document.getElementById('btn-admin').classList.toggle('active', isAdmin);
+    document.getElementById('btn-user').setAttribute('aria-selected', String(!isAdmin));
+    document.getElementById('btn-admin').setAttribute('aria-selected', String(isAdmin));
+
+    /* Heading */
+    document.getElementById('form-title').textContent    = isAdmin ? 'Yönetici Girişi'    : 'Hoş Geldiniz';
+    document.getElementById('form-subtitle').textContent = isAdmin
+      ? 'Yönetici hesabınızla giriş yapın.'
+      : 'Hesabınıza giriş yapın, verilerinizi görüntüleyin.';
+
+    /* Badge */
+    document.getElementById('admin-badge').classList.toggle('show', isAdmin);
+
+    /* Button */
+    const btn = document.getElementById('submit-btn');
+    btn.className = isAdmin
+      ? 'auth-btn auth-btn-admin'
+      : 'auth-btn auth-btn-user';
+    document.getElementById('btn-text').textContent = isAdmin ? 'Yönetici Olarak Gir' : 'Giriş Yap';
+
+    /* Left panel */
+    document.getElementById('brand-logo').classList.toggle('brand-logo-admin', isAdmin);
+    document.getElementById('panel-title').textContent = isAdmin ? 'Admin Panel' : 'FocusBoard';
+    document.getElementById('panel-desc').textContent  = isAdmin
+      ? 'Tüm kullanıcıları yönetin, sistem verilerini izleyin ve raporlara erişin.'
+      : 'Odaklanma sürenizi ve duruş kalitenizi gerçek zamanlı olarak izleyin.';
+
+    /* Clear alert */
+    hideAlert();
+  }
+
+  /* ── Password visibility ── */
+  function togglePassword(inputId, btnId) {
+    const inp = document.getElementById(inputId);
+    const isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+
+    const btn = document.getElementById(btnId);
+    btn.setAttribute('aria-label', isHidden ? 'Şifreyi gizle' : 'Şifreyi göster');
+    btn.querySelector('svg').innerHTML = isHidden
+      ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`
+      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  }
+
+  /* ── Alert banner ── */
+  function showAlert(type, text) {
+    const el = document.getElementById('auth-alert');
+    el.className = `auth-alert show ${type}`;
+    document.getElementById('alert-icon').textContent = type === 'error' ? '❌' : '✅';
+    document.getElementById('alert-text').textContent = text;
+  }
+  function hideAlert() {
+    document.getElementById('auth-alert').className = 'auth-alert';
+  }
+
+  /* ── Validation ── */
+  function validateField(groupId, value, errId, errMsg) {
+    const grp = document.getElementById(groupId);
+    const err = document.getElementById(errId);
+    if (!value.trim()) {
+      grp.classList.add('has-error');
+      err.textContent = errMsg;
+      return false;
+    }
+    grp.classList.remove('has-error');
+    return true;
+  }
+
+  /* ── Form submit ── */
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAlert();
+
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    const v1 = validateField('grp-username', username, 'err-username', 'Kullanıcı adı boş bırakılamaz.');
+    const v2 = validateField('grp-password', password, 'err-password', 'Şifre boş bırakılamaz.');
+    if (!v1 || !v2) return;
+
+    /* Loading */
+    const btn = document.getElementById('submit-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        showAlert('success', 'Giriş başarılı! Yönlendiriliyorsunuz…');
+
+        /* Role check for admin */
+        const role = (data.role || '').toLowerCase();
+        const expectAdmin = currentRole === 'admin';
+        if (expectAdmin && role !== 'admin') {
+          showAlert('error', 'Bu hesabın yönetici yetkisi yok.');
+          return;
+        }
+
+        setTimeout(() => {
+          window.location.href = role === 'admin' ? '/admin' : '/dashboard';
+        }, 900);
+
+      } else {
+        showAlert('error', 'Kullanıcı adı veya şifre hatalı.');
+        /* Shake the form */
+        const box = document.getElementById('login-form');
+        box.classList.add('shake');
+        setTimeout(() => box.classList.remove('shake'), 500);
+      }
+
+    } catch {
+      showAlert('error', 'Sunucuya bağlanılamadı. Lütfen tekrar deneyin.');
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  });
+
+  /* ── Live clear errors on input ── */
+  ['username', 'password'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      const grp = document.getElementById(`grp-${id}`);
+      if (grp) grp.classList.remove('has-error');
+    });
+  });
+</script>
+
+</body>
+</html>

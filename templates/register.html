@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FocusBoard yeni kullanıcı kayıt ekranı." />
+  <title>Kayıt Ol — FocusBoard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" />
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- ══════════════════════════════════════════
+       LEFT — Branding panel
+  ══════════════════════════════════════════ -->
+  <div class="auth-panel-left" aria-hidden="true">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+
+    <div class="brand-block">
+      <div class="brand-logo">🚀</div>
+      <h1 class="brand-title">Aramıza Katıl</h1>
+      <p class="brand-desc">
+        Ücretsiz hesap oluşturun ve verimlilik yolculuğunuza bugün başlayın.
+      </p>
+
+      <ul class="feature-list">
+        <li class="feature-pill"><span>✅</span> Ücretsiz hesap oluşturma</li>
+        <li class="feature-pill"><span>⚡</span> Anında aktivasyon</li>
+        <li class="feature-pill"><span>📈</span> Kişisel verimlilik analizi</li>
+        <li class="feature-pill"><span>🔒</span> Verileriniz güvende</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       RIGHT — Form panel
+  ══════════════════════════════════════════ -->
+  <div class="auth-panel-right">
+    <div class="auth-box" id="auth-box">
+
+      <!-- Back to login -->
+      <a href="{{ url_for('auth.login') }}" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Giriş ekranına dön
+      </a>
+
+      <!-- Heading -->
+      <div class="form-heading">
+        <h2 class="form-title">Hesap Oluştur</h2>
+        <p class="form-subtitle">Birkaç saniyede ücretsiz hesabınızı açın.</p>
+      </div>
+
+      <!-- Alert banner -->
+      <div class="auth-alert" id="auth-alert" role="alert" aria-live="assertive">
+        <span id="alert-icon">❌</span>
+        <span id="alert-text"></span>
+      </div>
+
+      <!-- Register Form -->
+      <form id="register-form" novalidate>
+
+        <!-- Ad & Soyad -->
+        <div class="name-row">
+          <div class="input-group" id="grp-firstname">
+            <label for="firstname">Ad</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              <input class="auth-input" type="text" id="firstname" name="firstname"
+                     placeholder="Ahmet" autocomplete="given-name" required />
+            </div>
+            <p class="input-error" id="err-firstname">Ad boş bırakılamaz.</p>
+          </div>
+
+          <div class="input-group" id="grp-lastname">
+            <label for="lastname">Soyad</label>
+            <div class="input-wrap">
+              <span class="input-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              <input class="auth-input" type="text" id="lastname" name="lastname"
+                     placeholder="Yılmaz" autocomplete="family-name" required />
+            </div>
+            <p class="input-error" id="err-lastname">Soyad boş bırakılamaz.</p>
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="input-group" id="grp-username">
+          <label for="username">Kullanıcı Adı</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <input class="auth-input" type="text" id="username" name="username"
+                   placeholder="kullanici_adi" autocomplete="username" required />
+          </div>
+          <p class="input-error" id="err-username">Kullanıcı adı en az 3 karakter olmalı.</p>
+        </div>
+
+        <!-- E-posta -->
+        <div class="input-group" id="grp-email">
+          <label for="email">E-posta</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+            <input class="auth-input" type="email" id="email" name="email"
+                   placeholder="ornek@email.com" autocomplete="email" required />
+          </div>
+          <p class="input-error" id="err-email">Geçerli bir e-posta giriniz.</p>
+        </div>
+
+        <!-- Şifre -->
+        <div class="input-group" id="grp-password">
+          <label for="password">Şifre</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <input class="auth-input" type="password" id="password" name="password"
+                   placeholder="••••••••" autocomplete="new-password" required />
+            <button type="button" class="pwd-toggle" aria-label="Şifreyi göster/gizle"
+                    onclick="togglePassword('password', 'eye-1')">
+              <svg id="eye-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Strength meter -->
+          <div class="pwd-strength" id="pwd-strength" aria-live="polite">
+            <div class="strength-bar">
+              <div class="strength-fill" id="strength-fill"></div>
+            </div>
+            <span class="strength-label" id="strength-label">Şifre gücü</span>
+          </div>
+          <p class="input-error" id="err-password">Şifre en az 6 karakter olmalı.</p>
+        </div>
+
+        <!-- Şifre tekrar -->
+        <div class="input-group" id="grp-confirm">
+          <label for="confirm">Şifre Tekrar</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </span>
+            <input class="auth-input" type="password" id="confirm" name="confirm"
+                   placeholder="••••••••" autocomplete="new-password" required />
+            <button type="button" class="pwd-toggle" aria-label="Şifreyi göster/gizle"
+                    onclick="togglePassword('confirm', 'eye-2')">
+              <svg id="eye-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <p class="input-error" id="err-confirm">Şifreler eşleşmiyor.</p>
+        </div>
+
+        <!-- Terms -->
+        <label class="terms-row" for="terms">
+          <input type="checkbox" id="terms" name="terms" required />
+          <span>
+            <a href="#" tabindex="-1">Kullanım koşullarını</a> ve
+            <a href="#" tabindex="-1">gizlilik politikasını</a> okudum, kabul ediyorum.
+          </span>
+        </label>
+        <p class="input-error" id="err-terms" style="margin-top:-0.5rem; margin-bottom:0.8rem;">
+          Devam etmek için koşulları kabul etmelisiniz.
+        </p>
+
+        <!-- Submit -->
+        <button type="submit" class="auth-btn auth-btn-user" id="submit-btn">
+          <span class="btn-text">Hesap Oluştur</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+
+      </form>
+
+      <!-- Divider -->
+      <div class="auth-divider">veya</div>
+
+      <p class="auth-bottom">
+        Zaten hesabınız var mı?
+        <a href="{{ url_for('auth.login') }}">Giriş Yap</a>
+      </p>
+
+    </div><!-- /.auth-box -->
+  </div><!-- /.auth-panel-right -->
+
+</div><!-- /.auth-page -->
+
+<!-- ────────────────────────────────────────────
+     JAVASCRIPT
+──────────────────────────────────────────── -->
+<script>
+  /* ── Password visibility ── */
+  function togglePassword(inputId, iconId) {
+    const inp = document.getElementById(inputId);
+    const isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+    const icon = document.getElementById(iconId);
+    icon.innerHTML = isHidden
+      ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`
+      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  }
+
+  /* ── Password strength ── */
+  document.getElementById('password').addEventListener('input', function () {
+    const val  = this.value;
+    const fill = document.getElementById('strength-fill');
+    const lbl  = document.getElementById('strength-label');
+    let score = 0;
+    if (val.length >= 6)              score++;
+    if (val.length >= 10)             score++;
+    if (/[A-Z]/.test(val))           score++;
+    if (/[0-9]/.test(val))           score++;
+    if (/[^A-Za-z0-9]/.test(val))    score++;
+
+    const levels = [
+      { pct:'0%',   color:'transparent', text:'Şifre gücü' },
+      { pct:'20%',  color:'#f87171',     text:'Çok Zayıf' },
+      { pct:'40%',  color:'#fb923c',     text:'Zayıf' },
+      { pct:'65%',  color:'#fbbf24',     text:'Orta' },
+      { pct:'85%',  color:'#34d27b',     text:'Güçlü' },
+      { pct:'100%', color:'#4f8ef7',     text:'Çok Güçlü 🔐' },
+    ];
+    const lvl = levels[Math.min(score, 5)];
+    fill.style.width      = val ? lvl.pct   : '0%';
+    fill.style.background = lvl.color;
+    lbl.textContent       = val ? lvl.text  : 'Şifre gücü';
+    lbl.style.color       = val ? lvl.color : '';
+  });
+
+  /* ── Alert ── */
+  function showAlert(type, text) {
+    const el = document.getElementById('auth-alert');
+    el.className = `auth-alert show ${type}`;
+    document.getElementById('alert-icon').textContent = type === 'error' ? '❌' : '✅';
+    document.getElementById('alert-text').textContent = text;
+  }
+  function hideAlert() {
+    document.getElementById('auth-alert').className = 'auth-alert';
+  }
+
+  /* ── Field validator ── */
+  function validateField(groupId, condition, errId, errMsg) {
+    const grp = document.getElementById(groupId);
+    const err = document.getElementById(errId);
+    if (!condition) {
+      grp.classList.add('has-error');
+      err.textContent = errMsg;
+      return false;
+    }
+    grp.classList.remove('has-error');
+    return true;
+  }
+
+  /* ── Submit ── */
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAlert();
+
+    const firstname = document.getElementById('firstname').value.trim();
+    const lastname  = document.getElementById('lastname').value.trim();
+    const username  = document.getElementById('username').value.trim();
+    const email     = document.getElementById('email').value.trim();
+    const password  = document.getElementById('password').value;
+    const confirm   = document.getElementById('confirm').value;
+    const terms     = document.getElementById('terms').checked;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const ok = [
+      validateField('grp-firstname', firstname.length > 0,              'err-firstname', 'Ad boş bırakılamaz.'),
+      validateField('grp-lastname',  lastname.length  > 0,              'err-lastname',  'Soyad boş bırakılamaz.'),
+      validateField('grp-username',  username.length  >= 3,             'err-username',  'Kullanıcı adı en az 3 karakter olmalı.'),
+      validateField('grp-email',     emailRegex.test(email),            'err-email',     'Geçerli bir e-posta giriniz.'),
+      validateField('grp-password',  password.length  >= 6,             'err-password',  'Şifre en az 6 karakter olmalı.'),
+      validateField('grp-confirm',   password === confirm,              'err-confirm',   'Şifreler eşleşmiyor.'),
+    ].every(Boolean);
+
+    /* Terms check */
+    const termsErr = document.getElementById('err-terms');
+    if (!terms) {
+      termsErr.style.display = 'block';
+      return;
+    } else {
+      termsErr.style.display = 'none';
+    }
+
+    if (!ok) return;
+
+    /* Loading */
+    const btn = document.getElementById('submit-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstname, lastname, username, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.status === 'success') {
+        showAlert('success', 'Hesabınız oluşturuldu! Giriş sayfasına yönlendiriliyorsunuz…');
+        setTimeout(() => { window.location.href = '/login'; }, 1500);
+      } else {
+        showAlert('error', data.message || 'Kayıt sırasında bir hata oluştu.');
+      }
+
+    } catch {
+      showAlert('error', 'Sunucuya bağlanılamadı. Lütfen tekrar deneyin.');
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  });
+
+  /* ── Live error clear ── */
+  ['firstname','lastname','username','email','password','confirm'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => {
+      document.getElementById(`grp-${id}`)?.classList.remove('has-error');
+    });
+  });
+</script>
+
+</body>
+</html>
